@@ -26,6 +26,29 @@
         });
     };
     
+    function ServerSideStore() {
+        var self = this,
+            baseUrl = "/Home",
+            xhr = function (requestdata) {
+                requestdata.type = requestdata.type || 'GET';
+                requestdata.dataType = requestdata.dataType || 'json';
+                requestdata.contentType = requestdata.contentType || 'application/json; charset=utf-8';
+
+                return $.ajax(requestdata);
+            };
+
+        return {
+            get: function (userId, successCallback) {
+                var data = { userId: userId };
+                return xhr({ url: baseUrl, data: data, success: successCallback });
+            },
+            put: function (item, userId) {
+                var data = { item: item, userId: userId };
+                return xhr({ url: baseUrl, data: JSON.stringify(data), success: console.log, type: 'POST' });
+            }
+        };
+    }
+    
     function History() {
         var self = this,
             globalHistory = [],
@@ -51,27 +74,28 @@
         };
     }
     
-    function Section(name, history) {
+    function Section(name) {
         var self = this;
-        //self.history = history;
-        //self.log = function (name, prev, curr) {
-        //    var item = { property: name, original: prev, current: curr, time: new Date() };
-        //    self.history.push(item);
-        //    globalLog(item);
-        //};
         self.name = ko.observable(name);//.onChanged(self.log, 'sections.name');
     }
 
-    function ViewModel() {
+    function ViewModel(id) {
         var self = this;
+        self.skip = false;
+        
         self.history = ko.observableArray([]);
-
+        self.userId = id;
+        
         self.globalHistory = new History();
+        self.storage = new ServerSideStore();
 
         self.log = function (name, prev, curr) {
-            var item = { property: name, original: prev, current: curr, time: new Date() };
-            self.history.push(item);
-            self.globalHistory.add(item);
+            if (!self.skip) {
+                var item = { property: name, original: prev, current: curr, time: new Date() };
+                self.history.push(item);
+                self.globalHistory.add(item);
+                self.storage.put(item, self.userId);
+            }
         };
 
         self.name = ko.observable("John").onChanged(self.log, 'name');
@@ -87,23 +111,32 @@
         //    ]);
 
         self.reset = function () {
+            self.skip = true;
+            
             self.name("John");
-            self.globalHistory.removeLast();
             self.email("john.stclair@statkraft.com");
-            self.globalHistory.removeLast();
             self.section.name('item1');
-            self.globalHistory.removeLast();
-            //self.sections(
-            //    [
-            //        new Section('item2', self.history),
-            //        new Section('item3', self.history)
-            //    ]);
             self.history([]);
+            
+            self.skip = false;
+        };
+
+        self.load = function () {
+            var success = function (data) {
+                self.loadFrom(data);
+            };
+            
+            self.storage.get(self.userId, success);
         };
         
         self.rebuild = function () {
-            ko.utils.arrayForEach(self.globalHistory.history(), function (item) {
-                var props = item.property.split('.'), 
+            self.loadFrom(self.globalHistory.history());
+        };
+
+        self.loadFrom = function (items) {
+            console.log(items);
+            ko.utils.arrayForEach(items, function (item) {
+                var props = item.property.split('.'),
                     p = null,
                     that = self;
                 for (var i = 0; i < props.length; i++) {
@@ -113,7 +146,7 @@
                     }
                     that = p;
                 }
-                
+
                 if (p && typeof p == "function") {
                     p(item.current);
                 }
@@ -122,7 +155,9 @@
         };
     }
 
-    var vm = new ViewModel();
+    var vm1 = new ViewModel('vm1');
+    var vm2 = new ViewModel('vm2');
 
-    ko.applyBindings(vm);
+    ko.applyBindings(vm1, document.getElementById('vm1'));
+    ko.applyBindings(vm2, document.getElementById('vm2'));
 });

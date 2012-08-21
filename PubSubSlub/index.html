@@ -3,27 +3,32 @@
 <head>
     <title>PubSub Slub</title>
     <style>
+        .vm1 {
+            float: left;
+            width: 50%;
+        }
+
         .inpt {
             width: 200px;
         }
     </style>
 </head>
     <body>
-        <div id="vm1">
+        <div class="vm1" id="vm1">
             <span>ViewModel 1</span><br/>
             <input class="inpt" type="text" data-bind="value: name" /><br/>
             <input class="inpt" type="text" data-bind="value: email" /><br/>
-            
+            <input class="inpt" type="text" data-bind="value: section.name"/>
+           
             <!--<ol data-bind="foreach: sections">
                 <li>-->
-                    <input class="inpt" type="text" data-bind="value: section.name"/>
             <!-- </li>
             </ol>
                 -->
-            
             <br/>
             <button data-bind="click: reset">Reset</button> 
             <button data-bind="click: rebuild">Replay log (global)</button>
+            <button data-bind="click: load">Load (server)</button>
             
             <ul data-bind="foreach: history">
                 <li>
@@ -33,9 +38,34 @@
                     at <span data-bind="text: time"></span>
                 </li>
             </ul>
-            
-
         </div>
+        
+        <div class="vm2" id="vm2">
+            <span>ViewModel 2</span><br/>
+            <input class="inpt" type="text" data-bind="value: name" /><br/>
+            <input class="inpt" type="text" data-bind="value: email" /><br/>
+            <input class="inpt" type="text" data-bind="value: section.name"/>
+           
+            <!--<ol data-bind="foreach: sections">
+                <li>-->
+            <!-- </li>
+            </ol>
+                -->
+            <br/>
+            <button data-bind="click: reset">Reset</button> 
+            <button data-bind="click: rebuild">Replay log (global)</button>
+             <button data-bind="click: load">Load (server)</button>
+            
+            <ul data-bind="foreach: history">
+                <li>
+                    Changed '<span data-bind="text: property"></span>'
+                    from '<span data-bind="text: original"></span>' 
+                    to '<span data-bind="text: current"></span>' 
+                    at <span data-bind="text: time"></span>
+                </li>
+            </ul>
+        </div>
+
         <script type="text/javascript" src="Scripts/jquery-1.8.0.js"></script>
         <script type="text/javascript" src="Scripts/knockout-2.1.0.debug.js"></script>
         <script type="text/javascript" src="Scripts/knockout-postbox.js"></script>
