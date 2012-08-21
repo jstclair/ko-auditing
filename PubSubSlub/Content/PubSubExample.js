@@ -42,8 +42,8 @@
                 var data = { userId: userId };
                 return xhr({ url: baseUrl, data: data, success: successCallback });
             },
-            put: function (item, userId) {
-                var data = { item: item, userId: userId };
+            put: function (item) {
+                var data = { item: item };
                 return xhr({ url: baseUrl, data: JSON.stringify(data), success: console.log, type: 'POST' });
             }
         };
@@ -79,22 +79,23 @@
         self.name = ko.observable(name);//.onChanged(self.log, 'sections.name');
     }
 
-    function ViewModel(id) {
+    function ViewModel(vm, userId) {
         var self = this;
         self.skip = false;
         
         self.history = ko.observableArray([]);
-        self.userId = id;
+        self.vm = vm;
+        self.userId = userId;
         
         self.globalHistory = new History();
         self.storage = new ServerSideStore();
 
-        self.log = function (name, prev, curr) {
+        self.log = function (prop, prev, curr) {
             if (!self.skip) {
-                var item = { property: name, original: prev, current: curr, time: new Date() };
+                var item = { property: prop, original: prev, current: curr, time: new Date(), userId: self.userId };
                 self.history.push(item);
                 self.globalHistory.add(item);
-                self.storage.put(item, self.userId);
+                self.storage.put(item);
             }
         };
 
@@ -155,8 +156,8 @@
         };
     }
 
-    var vm1 = new ViewModel('vm1');
-    var vm2 = new ViewModel('vm2');
+    var vm1 = new ViewModel('ViewModel 1', 'john');
+    var vm2 = new ViewModel('ViewModel 2', 'jrs');
 
     ko.applyBindings(vm1, document.getElementById('vm1'));
     ko.applyBindings(vm2, document.getElementById('vm2'));

@@ -29,11 +29,11 @@ namespace PubSubSlub.Controllers
         }
 
         [HttpPost, ActionName("Index")]
-        public ActionResult Post(History item, string userId)
+        public ActionResult Post(History item)
         {
-            if (string.IsNullOrWhiteSpace(userId))
+            if (item == null || string.IsNullOrWhiteSpace(item.userId))
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            _storage.AddOrUpdate(userId,
+            _storage.AddOrUpdate(item.userId,
                                  s => new List<History> { item },
                                  (_, list) =>
                                      {
@@ -51,6 +51,7 @@ namespace PubSubSlub.Controllers
         public string original { get; set; }
         public string current { get; set; }
         public DateTime time { get; set; }
+        public string userId { get; set; }
     }
 
     public class JsonNetResult : JsonResult
