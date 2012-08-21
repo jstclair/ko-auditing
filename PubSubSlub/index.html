@@ -3,13 +3,16 @@
 <head>
     <title>PubSub Slub</title>
 </head>
-<body>
-    
-    
-
-
-    <script type="text/javascript" src="Scripts/jquery-1.8.0.js"></script>
-    <script type="text/javascript" src="Scripts/knockout-2.1.0.debug.js"></script>
-    <script type="text/javascript" src="Scripts/knockout-postbox.js"></script>
-</body>
+    <body>
+        <div id="vm1">
+            <span>ViewModel1</span><br/>
+            <input type="text" data-bind="value: name" /><br/>
+            <input type="text" data-bind="value: email" /><br/>
+            <textarea cols="20" rows="10" data-bind="value: log"></textarea>
+        </div>
+        <script type="text/javascript" src="Scripts/jquery-1.8.0.js"></script>
+        <script type="text/javascript" src="Scripts/knockout-2.1.0.debug.js"></script>
+        <script type="text/javascript" src="Scripts/knockout-postbox.js"></script>
+        <script type="text/javascript" src="Content/PubSubExample.js"></script>
+    </body>
 </html>
