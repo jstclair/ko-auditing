@@ -25,11 +25,31 @@
             write: function (newValue) { base(newValue); }
         });
     };
+    
+    function History() {
+        var self = this,
+            globalHistory = [],
+            add = function (item) {
+                globalHistory.push(item);
+            },
+            removeLast = function () {
+                globalHistory = globalHistory.slice(0, globalHistory.length - 1);
+            },
+            sortedHistory = function () {
+                globalHistory.sort(function (l, r) {
+                    if (l.time > r.time) return 1;
+                    if (l.time < r.time) return -1;
+                    return 0;
+                });
+                return globalHistory;
+            };
 
-    var globalHistory = [];
-    var globalLog = function (item) {
-        globalHistory.push(item);
-    };
+        return {
+            history: sortedHistory,
+            add: add,
+            removeLast: removeLast
+        };
+    }
     
     function Section(name, history) {
         var self = this;
@@ -46,15 +66,20 @@
         var self = this;
         self.history = ko.observableArray([]);
 
+        self.globalHistory = new History();
+
         self.log = function (name, prev, curr) {
             var item = { property: name, original: prev, current: curr, time: new Date() };
             self.history.push(item);
-            globalLog(item);
+            self.globalHistory.add(item);
         };
+
         self.name = ko.observable("John").onChanged(self.log, 'name');
         self.email = ko.observable("john.stclair@statkraft.com").onChanged(self.log, 'email');
+
         self.section = new Section('item1');
         self.section.name.onChanged(self.log, 'section.name');
+        
         //self.sections = ko.observableArray(
         //    [
         //        new Section('item1', self.history),
@@ -63,11 +88,11 @@
 
         self.reset = function () {
             self.name("John");
-            globalHistory = globalHistory.slice(0, globalHistory.length - 1);
+            self.globalHistory.removeLast();
             self.email("john.stclair@statkraft.com");
-            globalHistory = globalHistory.slice(0, globalHistory.length - 1);
+            self.globalHistory.removeLast();
             self.section.name('item1');
-            globalHistory = globalHistory.slice(0, globalHistory.length - 1);
+            self.globalHistory.removeLast();
             //self.sections(
             //    [
             //        new Section('item2', self.history),
@@ -77,12 +102,7 @@
         };
         
         self.rebuild = function () {
-            globalHistory.sort(function (l, r) {
-                if (l.time > r.time) return 1;
-                if (l.time < r.time) return -1;
-                return 0;
-            });
-            ko.utils.arrayForEach(globalHistory, function (item) {
+            ko.utils.arrayForEach(self.globalHistory.history(), function (item) {
                 var props = item.property.split('.'), 
                     p = null,
                     that = self;
